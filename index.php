@@ -86,7 +86,7 @@ input[type="submit"]:hover {
 </head>
 <body>
     <!-- Form selecionar assunto -->
-    <form>
+    <form action="" method="post">
     <label for="assunto">Assunto:</label>
     <fieldset>
         <legend>Selecione até 2 opções:</legend>
@@ -103,57 +103,51 @@ input[type="submit"]:hover {
         <input type="checkbox" id="certidao" name="assunto[]" value="Certidão de numeração">
         <label for="certidao">Certidão de numeração</label><br>
     </fieldset>
-    </form>
-    <!-- Form análise -->
-    <form>    
+    <!-- Form análise -->   
     <label for="analise">Análise:</label>
         <select name="analise" id="analise">
             <option value="">Selecione uma opção</option>
-            <option value="1a">1ª</option>
-            <option value="2a">2ª</option>
-            <option value="3a">3ª</option>
-            <option value="4a">4ª</option>
-            <option value="5a">5ª</option>
-            <option value="6a">6ª</option>
-            <option value="7a">7ª</option>
-            <option value="8a">8ª</option>
-            <option value="9a">9ª</option>
-            <option value="10a">10ª</option>
+            <option value="1">1ª</option>
+            <option value="2">2ª</option>
+            <option value="3">3ª</option>
+            <option value="4">4ª</option>
+            <option value="5">5ª</option>
+            <option value="6">6ª</option>
+            <option value="7">7ª</option>
+            <option value="8">8ª</option>
+            <option value="9">9ª</option>
+            <option value="10">10ª</option>
         </select>
-    </form>    
+        </br> 
     <!-- Form análise -->
-    <form>
     <label for="solicitacao">Solicitação da demanda:</label>
         <select name="solicitacao" id="solicitacao" onchange="mostrarOutros()">
             <option value="">Selecione uma opção</option>
-            <option value="email">E-mail</option>
-            <option value="processo">Processo físico</option>
-            <option value="oficio">Ofício</option>
-            <option value="telefone">Telefone</option>
-            <option value="externo">Externo</option>
-            <option value="interno">Interno</option>
-            <option value="outros">Outros</option>
+            <option value="Email">E-mail</option>
+            <option value="Processo Físico">Processo físico</option>
+            <option value="Oficio">Ofício</option>
+            <option value="Telefone">Telefone</option>
+            <option value="Externo">Externo</option>
+            <option value="Interno">Interno</option>
+            <option value="Outros">Outros</option>
         </select>
-
-        <div id="outros" style="display:none">
-            <label for="outrosDescricao">Digite a descrição:</label>
-            <input type="text" name="outrosDescricao" id="outrosDescricao">
+        <div id="outros" style="display:none;">
+            <label for="outrosInput">Digite a solicitação:</label>
+            <input type="text" id="outrosInput" name="solicitacao">
         </div>
-    </form>
+        <input type="submit" value="Enviar">
+    </br>
     <!-- Form nome de contribuinte -->
-    <form> 
         <label for="contribuinte">Contribuinte:</label>
         <input type="text" name="contribuinte" id="contribuinte" placeholder="Nome do contribuinte">
-    </form>
+    </br>
     <!-- Form Inscrição Imobiliaria -->    
-    <form> 
         <label for="matricula">Inscrição do imóvel:</label>
         <input type="text" name="inscricao" id="inscriao" pattern="[0-9]{15}" placeholder="Número da inscrição" required>
         <span>ou</span>
         <label for="naoExistente"><input type="checkbox" name="naoExistente" id="naoExistente" value="naoExistente">Não existente</label>
-    </form>
-    <!-- Form endereço -->
-    <form> 
+    </br>
+    <!-- Form endereço --> 
         <label for="enderecoImovel">Endereço do imóvel:</label>
         <label for="rua">Rua:</label>
         <input type="text" name="rua" id="rua">
@@ -194,8 +188,7 @@ input[type="submit"]:hover {
             <option value="SE">Sergipe</option>
             <option value="TO">Tocantins</option>
         </select>
-    </form>
-    <form>
+        </br>
         <fieldset>  
             <legend>Dados recebidos:</legend>
             <label><input type="checkbox" name="dados[]" value="Planta do imóvel"> Planta do imóvel</label><br>
@@ -225,6 +218,22 @@ input[type="submit"]:hover {
 
 <?php
 require_once 'vendor/autoload.php';
+
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if (isset($_POST['assunto']) && is_array($_POST['assunto'])) {
+      $assuntos = $_POST['assunto'];
+      $texto_assunto = 'Assunto:';
+      if (count($assuntos) == 1) {
+        $texto_assunto .= ' ' . $assuntos[0];
+      } elseif (count($assuntos) > 1) {
+        $texto_assunto .= ' ' . $assuntos[0] . ' e ' . $assuntos[1];
+      }
+    }
+
+    $analises = $_POST['analise'];
+    $demanda = $_POST['solicitacao'];
+}
+
 
 $phpWord = new \PhpOffice\PhpWord\PhpWord();
 
@@ -290,8 +299,8 @@ $header->addTextBreak();
 $header->addText('RELATÓRIO TÉCNICO nº', $headerFontStyle, $paragraphStyle);
 //////////////////////////////////fim da header////////////////////////////
 
-$section->addText('Assunto: ', $contentfontStyle);
-$section->addText('Solicitação de demanda: ', $contentfontStyle);
+$section->addText($texto_assunto. "\t\t" . $analises .'ª análise', $contentfontStyle);
+$section->addText('Solicitação de demanda: ' . $demanda, $contentfontStyle);
 $section->addText('Contribuinte: ', $contentfontStyle);
 $section->addText('Endereço do imóvel: ', $contentfontStyle);
 $section->addText('Inscrição Imobiliária: ', $contentfontStyle);
@@ -320,12 +329,16 @@ for (var i = 0; i < checkboxes.length; i++) {
 function mostrarOutros() {
     var select = document.getElementById("solicitacao");
     var outrosDiv = document.getElementById("outros");
-    if (select.value == "outros") {
-      outrosDiv.style.display = "block";
+    var outrosInput = document.getElementById("outrosInput");
+    if (select.value == "Outros") {
+        outrosDiv.style.display = "block";
+        outrosInput.focus(); // dá foco no input para digitação
     } else {
-      outrosDiv.style.display = "none";
+        outrosDiv.style.display = "none";
     }
-  }
+    // atualiza o valor do select com o valor digitado pelo usuário
+    select.value = outrosInput.value;
+}
 </script>
 <script>
 function adicionarMatricula() {
