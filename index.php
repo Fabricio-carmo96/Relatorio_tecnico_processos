@@ -121,21 +121,20 @@ input[type="submit"]:hover {
         </br> 
     <!-- Form análise -->
     <label for="solicitacao">Solicitação da demanda:</label>
-        <select name="solicitacao" id="solicitacao" onchange="mostrarOutros()">
-            <option value="">Selecione uma opção</option>
-            <option value="Email">E-mail</option>
-            <option value="Processo Físico">Processo físico</option>
-            <option value="Oficio">Ofício</option>
-            <option value="Telefone">Telefone</option>
-            <option value="Externo">Externo</option>
-            <option value="Interno">Interno</option>
-            <option value="Outros">Outros</option>
-        </select>
-        <div id="outros" style="display:none;">
-            <label for="outrosInput">Digite a solicitação:</label>
-            <input type="text" id="outrosInput" name="solicitacao">
-        </div>
-        <input type="submit" value="Enviar">
+    <select name="solicitacao" id="solicitacao" onchange="mostrarOutros()">
+        <option value="">Selecione uma opção</option>
+        <option value="Email">E-mail</option>
+        <option value="Processo Físico">Processo físico</option>
+        <option value="Oficio">Ofício</option>
+        <option value="Telefone">Telefone</option>
+        <option value="Externo">Externo</option>
+        <option value="Interno">Interno</option>
+        <option value="Outros">Outros</option>
+    </select>
+    <div id="outros" style="display:none;">
+        <label for="outrosInput">Digite a solicitação:</label>
+        <input type="text" id="outrosInput" name="outrosSolicitacao">
+    </div>
     </br>
     <!-- Form nome de contribuinte -->
         <label for="contribuinte">Contribuinte:</label>
@@ -143,8 +142,7 @@ input[type="submit"]:hover {
     </br>
     <!-- Form Inscrição Imobiliaria -->    
         <label for="matricula">Inscrição do imóvel:</label>
-        <input type="text" name="inscricao" id="inscriao" pattern="[0-9]{15}" placeholder="Número da inscrição" required>
-        <span>ou</span>
+        <input type="text" name="inscricao" id="inscriao" pattern="[0-9]{15}" placeholder="Número da inscrição">
         <label for="naoExistente"><input type="checkbox" name="naoExistente" id="naoExistente" value="naoExistente">Não existente</label>
     </br>
     <!-- Form endereço --> 
@@ -207,10 +205,10 @@ input[type="submit"]:hover {
             </div>
             <div id="matriculaCampos" style="display:none;">
                 <label>Informe a matrícula do imóvel:</label>
-                <input type="button" value="Adicionar outra matrícula" onclick="adicionarMatricula()" />
-                <input type="text" name="matriculas[]" /><br>
+                <input type="text" name="matriculas" /><br>
             </div>
         </fieldset>
+        <input type="submit" value="Enviar">
     </form>
 
 
@@ -229,9 +227,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $texto_assunto .= ' ' . $assuntos[0] . ' e ' . $assuntos[1];
       }
     }
-
     $analises = $_POST['analise'];
     $demanda = $_POST['solicitacao'];
+    $contribuinte = $_POST['contribuinte'];
+    $inscricao = $_POST['inscricao'];
+    $nao_existente = isset($_POST['naoExistente']) ? true : false;
+    if ($nao_existente) {
+      $inscricao = "Não existe";
+    }
+    $rua = $_POST['rua'];
+    $numero = $_POST['numero'];
+    $bairro = $_POST['bairro'];
+    $cidade = $_POST['cidade'];
+    $estado = $_POST['estado'];
+  // Verifica se o campo "Matrícula do Imóvel" foi selecionado
+  if (in_array('Matrícula do Imóvel', $_POST['dados'])) {
+    // Salva o valor inserido no campo de texto em uma variável
+    $matriculaImovel = $_POST['matriculas'];
+  }
+  // Verifica se o campo "Outras" foi selecionado
+  if (in_array('Outras', $_POST['dados'])) {
+    // Salva as informações adicionais inseridas pelo usuário em uma variável
+    $outrasInformacoes = $_POST['outrasInformacoes'];
+  }
+  // Salva todas as opções selecionadas em um array
+  $dadosRecebidos = $_POST['dados'];
+  $informacoes = "";
+  foreach ($dadosRecebidos as $dado) {
+    $informacoes .= "- " . $dado . "\n";
+}
+
+  if (!empty($matriculaImovel)) {
+      $informacoes .= " " . $matriculaImovel . "\n";
+  }
+
+  if (!empty($outrasInformacoes)) {
+      foreach ($dadosRecebidos as &$dado) {
+          if ($dado === "Outras") {
+              $dado .= " - " . $outrasInformacoes;
+              $informacoes .= "- " . $dado . "\n";
+              break;
+          }
+      }
+  }
 }
 
 
@@ -301,10 +339,10 @@ $header->addText('RELATÓRIO TÉCNICO nº', $headerFontStyle, $paragraphStyle);
 
 $section->addText($texto_assunto. "\t\t" . $analises .'ª análise', $contentfontStyle);
 $section->addText('Solicitação de demanda: ' . $demanda, $contentfontStyle);
-$section->addText('Contribuinte: ', $contentfontStyle);
-$section->addText('Endereço do imóvel: ', $contentfontStyle);
-$section->addText('Inscrição Imobiliária: ', $contentfontStyle);
-$section->addText('Dados recebidos: ', $contentfontStyle);
+$section->addText('Contribuinte: '.$contribuinte, $contentfontStyle);
+$section->addText('Inscrição Imobiliária: '.$inscricao, $contentfontStyle);
+$section->addText('Endereço do imóvel: Rua '.$rua.', nº '.$numero. ' - bairro '.$bairro. ', '.$cidade.' - '.$estado, $contentfontStyle);
+$section->addText('Dados recebidos: '.$informacoes, $contentfontStyle);
 
 
 
@@ -341,15 +379,6 @@ function mostrarOutros() {
 }
 </script>
 <script>
-function adicionarMatricula() {
-  var divMatricula = document.getElementById("matriculaCampos");
-  var inputMatricula = document.createElement("input");
-  inputMatricula.type = "text";
-  inputMatricula.name = "matriculas[]";
-  divMatricula.appendChild(document.createElement("br"));
-  divMatricula.appendChild(inputMatricula);
-}
-
 var outrosCheckbox = document.querySelector('input[name="dados[]"][value="Outras"]');
 var outrosCampos = document.getElementById("outrosCampos");
 outrosCheckbox.addEventListener("change", function() {
@@ -370,15 +399,6 @@ matriculaCheckbox.addEventListener("change", function() {
   }
 });
 
-var matriculaCheckbox = document.querySelector('input[name="dados[]"][value="Matrícula do Imóvel"]');
-var matriculaCampos = document.getElementById("matriculaCampos");
-matriculaCheckbox.addEventListener("change", function() {
-  if (matriculaCheckbox.checked) {
-    matriculaCampos.style.display = "block";
-  } else {
-    matriculaCampos.style.display = "none";
-  }
-});
 </script>
 
 
