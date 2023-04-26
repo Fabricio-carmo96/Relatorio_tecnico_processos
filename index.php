@@ -252,13 +252,13 @@ input[type="submit"]:hover {
         </div>
         </fieldset>
         <fieldset>
-        <label for="invasao">Invasão de via pública?:</label>
+        <label for="invasao">Invasão de via pública?</label>
         <select name="invasao" id="invasao">
             <option value="">Selecione uma opção</option>
             <option value="invSim">Sim</option>
             <option value="invNao">Não</option>
         </select>
-        <input type="text" name="invasao" id="txtInvasao" placeholder="Nome da Rua:" hidden>
+        <input type="text" name="txtInvasao" id="txtInvasao" placeholder="Nome da Rua:" hidden>
         </fieldset>
         <fieldset>
         <label for="diferenca">Possui diferença de área?</label>
@@ -344,6 +344,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       echo "entrou";
     }
   }
+  var_dump($deslocamento);
+  var_dump($sobreposicao);
+  var_dump($invasao);
+  var_dump($diferenca);
   
 }
 
