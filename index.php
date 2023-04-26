@@ -1,3 +1,8 @@
+<?php
+session_start();
+ob_start();
+include_once 'conexao.php';
+?>
 <!DOCTYPE html>
 <html>
 <head>
@@ -121,21 +126,20 @@ input[type="submit"]:hover {
         </br> 
     <!-- Form análise -->
     <label for="solicitacao">Solicitação da demanda:</label>
-        <select name="solicitacao" id="solicitacao" onchange="mostrarOutros()">
-            <option value="">Selecione uma opção</option>
-            <option value="Email">E-mail</option>
-            <option value="Processo Físico">Processo físico</option>
-            <option value="Oficio">Ofício</option>
-            <option value="Telefone">Telefone</option>
-            <option value="Externo">Externo</option>
-            <option value="Interno">Interno</option>
-            <option value="Outros">Outros</option>
-        </select>
-        <div id="outros" style="display:none;">
-            <label for="outrosInput">Digite a solicitação:</label>
-            <input type="text" id="outrosInput" name="solicitacao">
-        </div>
-        <input type="submit" value="Enviar">
+    <select name="solicitacao" id="solicitacao" onchange="mostrarOutros()">
+        <option value="">Selecione uma opção</option>
+        <option value="Email">E-mail</option>
+        <option value="Processo Físico">Processo físico</option>
+        <option value="Oficio">Ofício</option>
+        <option value="Telefone">Telefone</option>
+        <option value="Externo">Externo</option>
+        <option value="Interno">Interno</option>
+        <option value="Outros">Outros</option>
+    </select>
+    <div id="outros" style="display:none;">
+        <label for="outrosInput">Digite a solicitação:</label>
+        <input type="text" id="outrosInput" name="outrosSolicitacao">
+    </div>
     </br>
     <!-- Form nome de contribuinte -->
         <label for="contribuinte">Contribuinte:</label>
@@ -143,8 +147,7 @@ input[type="submit"]:hover {
     </br>
     <!-- Form Inscrição Imobiliaria -->    
         <label for="matricula">Inscrição do imóvel:</label>
-        <input type="text" name="inscricao" id="inscriao" pattern="[0-9]{15}" placeholder="Número da inscrição" required>
-        <span>ou</span>
+        <input type="text" name="inscricao" id="inscriao" pattern="[0-9]{15}" placeholder="Número da inscrição">
         <label for="naoExistente"><input type="checkbox" name="naoExistente" id="naoExistente" value="naoExistente">Não existente</label>
     </br>
     <!-- Form endereço --> 
@@ -207,10 +210,68 @@ input[type="submit"]:hover {
             </div>
             <div id="matriculaCampos" style="display:none;">
                 <label>Informe a matrícula do imóvel:</label>
-                <input type="button" value="Adicionar outra matrícula" onclick="adicionarMatricula()" />
-                <input type="text" name="matriculas[]" /><br>
+                <input type="text" name="matriculas" /><br>
             </div>
         </fieldset>
+        <label for="deslocamento">Deslocamento:</label>
+        <select name="deslocamento" id="deslocamento">
+            <option value="">Selecione uma opção</option>
+            <option value="deslSim">Sim</option>
+            <option value="deslNao">Não</option>
+        </select>
+          
+        <fieldset> 
+        <label for="sobreposicao">Sobreposição:</label>
+        <select name="sobreposicao" id="sobreposicao" onchange="mostrarOcultarSobreposicao()">
+            <option value="">Selecione uma opção</option>
+            <option value="sobSim">Sim</option>
+            <option value="sobNao">Não</option>
+        </select>
+        <div id="divSobreposicao" style="display:none; ">
+          <select name="primeiraSob" id="primeiraSob">
+              <option value="">Selecione a primeira sobreposição</option>
+              <option value="1">à esquerda</option>
+              <option value="2">à direita</option>
+              <option value="3">ao fundo</option>
+          </select>
+          <select name="segundoSob" id="segundoSob">
+              <option value="">Selecione a terceira sobreposição</option>
+              <option value="4">, à direita</option>
+              <option value="5">, à esquerda</option>
+              <option value="6">, ao fundo</option>
+              <option value="7">e à esquerda(finalizar)</option>
+              <option value="8">e à direita(finalizar)</option>
+              <option value="6">e ao fundo(finalizar)</option>
+          </select>
+          <select name="terceiroSob" id="segundoSob">
+              <option value="">Selecione a terceira sobreposição</option>
+              <option value="7">e à esquerda(finalizar)</option>
+              <option value="8">e à direita(finalizar)</option>
+              <option value="6">e ao fundo(finalizar)</option>
+          </select>
+        </div>
+        </fieldset>
+        <fieldset>
+        <label for="invasao">Invasão de via pública?:</label>
+        <select name="invasao" id="invasao">
+            <option value="">Selecione uma opção</option>
+            <option value="invSim">Sim</option>
+            <option value="invNao">Não</option>
+        </select>
+        <input type="text" name="invasao" id="txtInvasao" placeholder="Nome da Rua:" hidden>
+        </fieldset>
+        <fieldset>
+        <label for="diferenca">Possui diferença de área?</label>
+        <select name="diferenca" id="diferenca">
+            <option value="">Selecione uma opção</option>
+            <option value="difSim">Sim</option>
+            <option value="difNao">Não</option>
+        </select>
+        <input type="text" name="txtDiferenca" id="txtDiferenca" placeholder="Digite a diferença:" hidden>
+        </fieldset>
+
+    </br>
+        <input type="submit" value="Enviar">
     </form>
 
 
@@ -229,10 +290,63 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $texto_assunto .= ' ' . $assuntos[0] . ' e ' . $assuntos[1];
       }
     }
-
     $analises = $_POST['analise'];
     $demanda = $_POST['solicitacao'];
+    $contribuinte = $_POST['contribuinte'];
+    $inscricao = $_POST['inscricao'];
+    $nao_existente = isset($_POST['naoExistente']) ? true : false;
+    if ($nao_existente) {
+      $inscricao = "Não existe";
+    }
+    $rua = $_POST['rua'];
+    $numero = $_POST['numero'];
+    $bairro = $_POST['bairro'];
+    $cidade = $_POST['cidade'];
+    $estado = $_POST['estado'];
+  // Verifica se o campo "Matrícula do Imóvel" foi selecionado
+  if (in_array('Matrícula do Imóvel', $_POST['dados'])) {
+    // Salva o valor inserido no campo de texto em uma variável
+    $matriculaImovel = $_POST['matriculas'];
+  }
+  // Verifica se o campo "Outras" foi selecionado
+  if (in_array('Outras', $_POST['dados'])) {
+    // Salva as informações adicionais inseridas pelo usuário em uma variável
+    $outrasInformacoes = $_POST['outrasInformacoes'];
+  }
+  // Salva todas as opções selecionadas em um array
+  $dadosRecebidos = $_POST['dados'];
+  $informacoes = "";
+  foreach ($dadosRecebidos as $dado) {
+    $informacoes .= "- " . $dado . "\n";
 }
+
+  if (!empty($matriculaImovel)) {
+      $informacoes .= " " . $matriculaImovel . "\n";
+  }
+
+  if (!empty($outrasInformacoes)) {
+      foreach ($dadosRecebidos as &$dado) {
+          if ($dado === "Outras") {
+              $dado .= " - " . $outrasInformacoes;
+              $informacoes .= "- " . $dado . "\n";
+              break;
+          }
+      }
+  }
+
+  if (isset($_POST['deslocamento']) && isset($_POST['sobreposicao']) && isset($_POST['invasao']) && isset($_POST['diferenca'])) {
+    $deslocamento = $_POST['deslocamento'];
+    $sobreposicao = $_POST['sobreposicao'];
+    $invasao = $_POST['invasao'];
+    $diferenca = $_POST['diferenca'];
+    if ($deslocamento == "deslNao" && $sobreposicao == "sobNao" && $invasao == "invNao" && $diferenca == "difNao") {
+      $allNao = 'Após verificação dos arquivos apresentados à Prefeitura Municipal de Itabira referentes ao levantamento realizado, não foram identificados deslocamentos, sobreposições, nem invasão de vias públicas. Recomenda-se que a Prefeitura Municipal de Itabira opte pelo deferimento do processo XXXX/XX/XXXX.';
+      echo "entrou";
+    }
+  }
+  
+}
+
 
 
 $phpWord = new \PhpOffice\PhpWord\PhpWord();
@@ -301,10 +415,13 @@ $header->addText('RELATÓRIO TÉCNICO nº', $headerFontStyle, $paragraphStyle);
 
 $section->addText($texto_assunto. "\t\t" . $analises .'ª análise', $contentfontStyle);
 $section->addText('Solicitação de demanda: ' . $demanda, $contentfontStyle);
-$section->addText('Contribuinte: ', $contentfontStyle);
-$section->addText('Endereço do imóvel: ', $contentfontStyle);
-$section->addText('Inscrição Imobiliária: ', $contentfontStyle);
-$section->addText('Dados recebidos: ', $contentfontStyle);
+$section->addText('Contribuinte: '.$contribuinte, $contentfontStyle);
+$section->addText('Inscrição Imobiliária: '.$inscricao, $contentfontStyle);
+$section->addText('Endereço do imóvel: Rua '.$rua.', nº '.$numero. ' - bairro '.$bairro. ', '.$cidade.' - '.$estado, $contentfontStyle);
+$section->addText('Dados recebidos: '.$informacoes, $contentfontStyle);
+$section ->addText($allNao, $contentfontStyle);
+
+
 
 
 
@@ -341,15 +458,6 @@ function mostrarOutros() {
 }
 </script>
 <script>
-function adicionarMatricula() {
-  var divMatricula = document.getElementById("matriculaCampos");
-  var inputMatricula = document.createElement("input");
-  inputMatricula.type = "text";
-  inputMatricula.name = "matriculas[]";
-  divMatricula.appendChild(document.createElement("br"));
-  divMatricula.appendChild(inputMatricula);
-}
-
 var outrosCheckbox = document.querySelector('input[name="dados[]"][value="Outras"]');
 var outrosCampos = document.getElementById("outrosCampos");
 outrosCheckbox.addEventListener("change", function() {
@@ -370,16 +478,39 @@ matriculaCheckbox.addEventListener("change", function() {
   }
 });
 
-var matriculaCheckbox = document.querySelector('input[name="dados[]"][value="Matrícula do Imóvel"]');
-var matriculaCampos = document.getElementById("matriculaCampos");
-matriculaCheckbox.addEventListener("change", function() {
-  if (matriculaCheckbox.checked) {
-    matriculaCampos.style.display = "block";
-  } else {
-    matriculaCampos.style.display = "none";
-  }
-});
 </script>
+<script>
+  function mostrarOcultarSobreposicao() {
+    var selectSobreposicao = document.getElementById("sobreposicao");
+    var divSobreposicao = document.getElementById("divSobreposicao");
 
+    if (selectSobreposicao.value == "sobSim") {
+      divSobreposicao.style.display = "block";
+    } else {
+      divSobreposicao.style.display = "none";
+    }
+  }
 
+  const select = document.getElementById('invasao');
+  const input = document.getElementById('txtInvasao');
 
+  select.addEventListener('change', () => {
+    if (select.value === 'invSim') {
+      input.removeAttribute('hidden');
+    } else {
+      input.setAttribute('hidden', '');
+    }
+  });
+
+  const selectDif = document.getElementById('diferenca');
+  const inputDif = document.getElementById('txtDiferenca');
+
+  selectDif.addEventListener('change', () => {
+    if (selectDif.value === 'difSim') {
+      inputDif.removeAttribute('hidden');
+    } else {
+      inputDif.setAttribute('hidden', '');
+    }
+  });
+
+</script>
