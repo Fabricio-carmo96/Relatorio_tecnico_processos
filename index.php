@@ -421,11 +421,6 @@ $section->addText('Endereço do imóvel: Rua '.$rua.', nº '.$numero. ' - bairro
 $section->addText('Dados recebidos: '.$informacoes, $contentfontStyle);
 $section ->addText($allNao, $contentfontStyle);
 
-
-
-
-
-
 $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
 $writer->save('exemplo.docx');
 
