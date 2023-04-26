@@ -362,11 +362,9 @@ $header = $section->addHeader();
 
 // config style
 $tableStyle = array(
-    'borderBottomSize' => 7,
-    'borderLeftSize' => 7,
-    'borderRightize' => 7,
-    'borderTopSize' => 7,
-    'cellSpacing' => 2
+  'borderSize' => 15,
+  'borderColor' => '000000',
+  'cellMargin' => 50,
 );
 $phpWord->addTableStyle('myTableStyle', $tableStyle);
 
@@ -389,6 +387,7 @@ $contentfontStyle = array(
 
 // create a new table
 $table = $header->addTable('myTableStyle');
+$table->setWidth(5000);
 
 // add some rows and cells to the table
 $table->addRow();
