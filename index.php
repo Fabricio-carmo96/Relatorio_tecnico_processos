@@ -145,11 +145,16 @@ input[type="submit"]:hover {
         <label for="contribuinte">Contribuinte:</label>
         <input type="text" name="contribuinte" id="contribuinte" placeholder="Nome do contribuinte">
     </br>
-    <!-- Form Inscrição Imobiliaria -->    
-        <label for="matricula">Inscrição do imóvel:</label>
-        <input type="text" name="inscricao" id="inscriao" pattern="[0-9]{15}" placeholder="Número da inscrição">
-        <label for="naoExistente"><input type="checkbox" name="naoExistente" id="naoExistente" value="naoExistente">Não existente</label>
+    <!-- Form Matricula -->    
+    <label for="matricula">Matrículas:</label>
+    <input type="text" name="matricula" id="matricula" placeholder="Número da Matrícula">
+    <label for="MatnaoExistente"><input type="checkbox" name="MatnaoExistente" id="MatnaoExistente" value="naoExistente" onclick="disableMatricula()">Não existente</label>
     </br>
+    <!-- Form Inscrição Imobiliaria -->    
+    <label for="inscricao">Inscrição do imóvel:</label>
+    <input type="text" name="inscricao" id="inscricao" pattern="[0-9]{15}" placeholder="Número da inscrição">
+    <label for="naoExistente"><input type="checkbox" name="naoExistente" id="naoExistente" value="naoExistente" onclick="disableInput()">Não existente</label>
+</br>
     <!-- Form endereço --> 
         <label for="enderecoImovel">Endereço do imóvel:</label>
         <label for="rua">Rua:</label>
@@ -196,7 +201,6 @@ input[type="submit"]:hover {
             <legend>Dados recebidos:</legend>
             <label><input type="checkbox" name="dados[]" value="Planta do imóvel"> Planta do imóvel</label><br>
             <label><input type="checkbox" name="dados[]" value="Memorial descritivo"> Memorial descritivo</label><br>
-            <label><input type="checkbox" name="dados[]" value="Matrícula do Imóvel"> Matrícula do Imóvel</label><br>
             <label><input type="checkbox" name="dados[]" value="Escritura"> Escritura</label><br>
             <label><input type="checkbox" name="dados[]" value="Certidão"> Certidão</label><br>
             <label><input type="checkbox" name="dados[]" value="Compra e venda"> Compra e venda</label><br>
@@ -207,10 +211,6 @@ input[type="submit"]:hover {
             <div id="outrosCampos" style="display:none;">
                 <label>Informe outras informações:</label><br>
                 <textarea name="outrasInformacoes"></textarea>
-            </div>
-            <div id="matriculaCampos" style="display:none;">
-                <label>Informe a matrícula do imóvel:</label>
-                <input type="text" name="matriculas" /><br>
             </div>
         </fieldset>
         <label for="deslocamento">Deslocamento:</label>
@@ -341,14 +341,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $diferenca = $_POST['diferenca'];
     if ($deslocamento == "deslNao" && $sobreposicao == "sobNao" && $invasao == "invNao" && $diferenca == "difNao") {
       $allNao = 'Após verificação dos arquivos apresentados à Prefeitura Municipal de Itabira referentes ao levantamento realizado, não foram identificados deslocamentos, sobreposições, nem invasão de vias públicas. Recomenda-se que a Prefeitura Municipal de Itabira opte pelo deferimento do processo XXXX/XX/XXXX.';
-      echo "entrou";
     }
-  }
-  var_dump($deslocamento);
-  var_dump($sobreposicao);
-  var_dump($invasao);
-  var_dump($diferenca);
-  
+  }  
 }
 
 
@@ -416,12 +410,13 @@ $header->addTextBreak();
 $header->addText('RELATÓRIO TÉCNICO nº', $headerFontStyle, $paragraphStyle);
 //////////////////////////////////fim da header////////////////////////////
 
-$section->addText($texto_assunto. "\t\t" . $analises .'ª análise', $contentfontStyle);
+$section->addText($texto_assunto. "\t\t\t\t" . $analises .'ª análise', $contentfontStyle);
 $section->addText('Solicitação de demanda: ' . $demanda, $contentfontStyle);
 $section->addText('Contribuinte: '.$contribuinte, $contentfontStyle);
 $section->addText('Inscrição Imobiliária: '.$inscricao, $contentfontStyle);
 $section->addText('Endereço do imóvel: Rua '.$rua.', nº '.$numero. ' - bairro '.$bairro. ', '.$cidade.' - '.$estado, $contentfontStyle);
 $section->addText('Dados recebidos: '.$informacoes, $contentfontStyle);
+$section->addTextBreak();
 $section ->addText($allNao, $contentfontStyle);
 
 $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
@@ -466,16 +461,6 @@ outrosCheckbox.addEventListener("change", function() {
   }
 });
 
-var matriculaCheckbox = document.querySelector('input[name="dados[]"][value="Matrícula do Imóvel"]');
-var matriculaCampos = document.getElementById("matriculaCampos");
-matriculaCheckbox.addEventListener("change", function() {
-  if (matriculaCheckbox.checked) {
-    matriculaCampos.style.display = "block";
-  } else {
-    matriculaCampos.style.display = "none";
-  }
-});
-
 </script>
 <script>
   function mostrarOcultarSobreposicao() {
@@ -510,5 +495,25 @@ matriculaCheckbox.addEventListener("change", function() {
       inputDif.setAttribute('hidden', '');
     }
   });
+
+  function disableInput() {
+  var checkbox = document.getElementById("naoExistente");
+  var input = document.getElementById("inscricao");
+  if (checkbox.checked == true) {
+    input.disabled = true;
+  } else {
+    input.disabled = false;
+  }
+}
+
+function disableMatricula() {
+  var checkbox = document.getElementById("MatnaoExistente");
+  var input = document.getElementById("matricula");
+  if (checkbox.checked == true) {
+    input.disabled = true;
+  } else {
+    input.disabled = false;
+  }
+}
 
 </script>
