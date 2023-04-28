@@ -126,20 +126,20 @@ input[type="submit"]:hover {
         </br> 
     <!-- Form análise -->
     <label for="solicitacao">Solicitação da demanda:</label>
-    <select name="solicitacao" id="solicitacao" onchange="mostrarOutros()">
-        <option value="">Selecione uma opção</option>
-        <option value="Email">E-mail</option>
-        <option value="Processo Físico">Processo físico</option>
-        <option value="Oficio">Ofício</option>
-        <option value="Telefone">Telefone</option>
-        <option value="Externo">Externo</option>
-        <option value="Interno">Interno</option>
-        <option value="Outros">Outros</option>
-    </select>
-    <div id="outros" style="display:none;">
-        <label for="outrosInput">Digite a solicitação:</label>
-        <input type="text" id="outrosInput" name="outrosSolicitacao">
-    </div>
+        <select name="solicitacao" id="solicitacao" onchange="mostrarOutros()">
+            <option value="">Selecione uma opção</option>
+            <option value="Email">E-mail</option>
+            <option value="Processo Físico">Processo físico</option>
+            <option value="Oficio">Ofício</option>
+            <option value="Telefone">Telefone</option>
+            <option value="Externo">Externo</option>
+            <option value="Interno">Interno</option>
+            <option value="Outros">Outros</option>
+        </select>
+        <div id="outrosDemanda" style="display:none; ">
+            <label for="outrosInput">Digite a solicitação:</label>
+            <input type="text" id="outrosInput" name="outrosSolicitacao">
+        </div>
     </br>
     <!-- Form nome de contribuinte -->
         <label for="contribuinte">Contribuinte:</label>
@@ -271,7 +271,7 @@ input[type="submit"]:hover {
         </fieldset>
 
     </br>
-        <input type="submit" value="Enviar">
+        <input type="submit" name="enviar" value="Enviar">
     </form>
 
 
@@ -291,23 +291,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       }
     }
     $analises = $_POST['analise'];
-    $demanda = $_POST['solicitacao'];
+    if ($_POST["solicitacao"] == "Outros") {
+      $solicitacao = $_POST["outrosSolicitacao"];
+     } else {
+      $solicitacao = $_POST["solicitacao"];
+     }
+  
+
     $contribuinte = $_POST['contribuinte'];
-    $inscricao = $_POST['inscricao'];
     $nao_existente = isset($_POST['naoExistente']) ? true : false;
     if ($nao_existente) {
       $inscricao = "Não existe";
+    } else{
+    $inscricao = $_POST['inscricao'];
+    }
+    $matNao_existente = isset($_POST['MatnaoExistente']) ? true : false;
+    if ($matNao_existente) {
+      $matriculaImovel = "Não existe";
+      $textMatricula ="";
+    } else {
+      $matriculaImovel = $_POST['matricula'];
     }
     $rua = $_POST['rua'];
     $numero = $_POST['numero'];
     $bairro = $_POST['bairro'];
     $cidade = $_POST['cidade'];
     $estado = $_POST['estado'];
-  // Verifica se o campo "Matrícula do Imóvel" foi selecionado
-  if (in_array('Matrícula do Imóvel', $_POST['dados'])) {
-    // Salva o valor inserido no campo de texto em uma variável
-    $matriculaImovel = $_POST['matriculas'];
-  }
   // Verifica se o campo "Outras" foi selecionado
   if (in_array('Outras', $_POST['dados'])) {
     // Salva as informações adicionais inseridas pelo usuário em uma variável
@@ -346,7 +355,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 
-
+if (isset($_POST['enviar'])) {
 $phpWord = new \PhpOffice\PhpWord\PhpWord();
 
 $section = $phpWord->addSection();
@@ -411,7 +420,7 @@ $header->addText('RELATÓRIO TÉCNICO nº', $headerFontStyle, $paragraphStyle);
 //////////////////////////////////fim da header////////////////////////////
 
 $section->addText($texto_assunto. "\t\t\t\t" . $analises .'ª análise', $contentfontStyle);
-$section->addText('Solicitação de demanda: ' . $demanda, $contentfontStyle);
+$section->addText('Solicitação de demanda: ' . $solicitacao, $contentfontStyle);
 $section->addText('Contribuinte: '.$contribuinte, $contentfontStyle);
 $section->addText('Inscrição Imobiliária: '.$inscricao, $contentfontStyle);
 $section->addText('Endereço do imóvel: Rua '.$rua.', nº '.$numero. ' - bairro '.$bairro. ', '.$cidade.' - '.$estado, $contentfontStyle);
@@ -421,6 +430,7 @@ $section ->addText($allNao, $contentfontStyle);
 
 $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
 $writer->save('exemplo.docx');
+}
 
 ?>
 </body>
@@ -438,7 +448,7 @@ for (var i = 0; i < checkboxes.length; i++) {
 }
 function mostrarOutros() {
     var select = document.getElementById("solicitacao");
-    var outrosDiv = document.getElementById("outros");
+    var outrosDiv = document.getElementById("outrosDemanda");
     var outrosInput = document.getElementById("outrosInput");
     if (select.value == "Outros") {
         outrosDiv.style.display = "block";
@@ -446,9 +456,8 @@ function mostrarOutros() {
     } else {
         outrosDiv.style.display = "none";
     }
-    // atualiza o valor do select com o valor digitado pelo usuário
-    select.value = outrosInput.value;
 }
+
 </script>
 <script>
 var outrosCheckbox = document.querySelector('input[name="dados[]"][value="Outras"]');
