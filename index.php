@@ -234,8 +234,8 @@ input[type="submit"]:hover {
               <option value="2">à direita</option>
               <option value="3">ao fundo</option>
           </select>
-          <select name="segundoSob" id="segundoSob">
-              <option value="">Selecione a terceira sobreposição</option>
+          <select name="segundaSob" id="segundaSob">
+              <option value="">Selecione a segunda sobreposição</option>
               <option value="4">, à direita</option>
               <option value="5">, à esquerda</option>
               <option value="6">, ao fundo</option>
@@ -243,7 +243,7 @@ input[type="submit"]:hover {
               <option value="8">e à direita(finalizar)</option>
               <option value="6">e ao fundo(finalizar)</option>
           </select>
-          <select name="terceiroSob" id="segundoSob">
+          <select name="terceiraSob" id="terceiraSob">
               <option value="">Selecione a terceira sobreposição</option>
               <option value="7">e à esquerda(finalizar)</option>
               <option value="8">e à direita(finalizar)</option>
@@ -308,9 +308,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $matNao_existente = isset($_POST['MatnaoExistente']) ? true : false;
     if ($matNao_existente) {
       $matriculaImovel = "Não existe";
-      $textMatricula ="";
+      $textMatricula = "Devido a não existência de matrícula, a área técnica se exime de qualquer responsabilidade sobre o processo de afirmação de propriedade. Nos atendo à comparação do levantamento planimétrico com o registro da ortofoto em prefeitura. É importante afirmar que a escritura de compra e venda se trata de acordo bilateral entre o comprador e o vendedor, portanto não é um documento oficial para afirmação de propriedade.";
     } else {
       $matriculaImovel = $_POST['matricula'];
+      $textMatricula = "";
     }
     $rua = $_POST['rua'];
     $numero = $_POST['numero'];
@@ -328,11 +329,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   foreach ($dadosRecebidos as $dado) {
     $informacoes .= "- " . $dado . "\n";
 }
-
-  if (!empty($matriculaImovel)) {
-      $informacoes .= " " . $matriculaImovel . "\n";
-  }
-
   if (!empty($outrasInformacoes)) {
       foreach ($dadosRecebidos as &$dado) {
           if ($dado === "Outras") {
@@ -348,9 +344,56 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sobreposicao = $_POST['sobreposicao'];
     $invasao = $_POST['invasao'];
     $diferenca = $_POST['diferenca'];
+    if (isset($_POST['primeiraSob'])) {
+      $inputPrimeiraSobreposicao = $_POST['primeiraSob'];
+  } else {
+      $inputPrimeiraSobreposicao = '';
+  }
+    if (isset($_POST['segundaSob'])) {
+      $inputSegundaSobreposicao = $_POST['segundaSob'];
+  } else {
+      $inputSegundaSobreposicao = '';
+  }
+    if (isset($_POST['terceiraSob'])) {
+      $inpuTerceiraSobreposicao = $_POST['terceiraSob'];
+  } else {
+      $inpuTerceiraSobreposicao = '';
+  }
+    if (isset($_POST['txtInvasao'])) {
+      $inputInvasão = $_POST['txtInvasao'];
+  } else {
+      $inputInvasão = '';
+  }
+  if (isset($_POST['txtDiferenca'])) {
+    $inputDiferenca = $_POST['txtDiferenca'];
+} else {
+    $inputDiferenca = '';
+}
+$textGeral ='';
+
     if ($deslocamento == "deslNao" && $sobreposicao == "sobNao" && $invasao == "invNao" && $diferenca == "difNao") {
-      $allNao = 'Após verificação dos arquivos apresentados à Prefeitura Municipal de Itabira referentes ao levantamento realizado, não foram identificados deslocamentos, sobreposições, nem invasão de vias públicas. Recomenda-se que a Prefeitura Municipal de Itabira opte pelo deferimento do processo XXXX/XX/XXXX.';
+      $textGeral = 'Após verificação dos arquivos apresentados à Prefeitura Municipal de Itabira referentes ao levantamento realizado, não foram identificados deslocamentos, sobreposições, nem invasão de vias públicas. Recomenda-se que a Prefeitura Municipal de Itabira opte pelo deferimento do processo XXXX/XX/XXXX.';
     }
+    else if ($deslocamento == "deslNao" && $sobreposicao == "sobNao" && $invasao == "invNao" && $diferenca == "difSim") {
+      $textGeral = 'Após verificação dos arquivos apresentados à Prefeitura Municipal de Itabira referentes ao levantamento realizado, não foram identificados deslocamentos, sobreposições, nem invasão de vias públicas. Entretanto, foi identificada divergência entre a área da planta e do memorial descritivo. Recomenda-se que a Prefeitura Municipal de Itabira opte pelo indeferimento do processo XXXX/XX/XXXX, devido à diferença de '.$inputDiferenca .'  entre a área da planta e do memorial descritivo. Após a adequação, o processo se torna apto ao deferimento.'. "\n" . ' OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
+    }
+    else if ($deslocamento == "deslSim" && $sobreposicao == "sobSim" && $invasao == "invSim" && $diferenca == "difNao") {
+      $textGeral ='Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta avanço em relação a via pública, além de sobreposição com o lote vizinho YYY. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante YYY e avanço em relação à via ZZZ.';
+    }
+    else if ($deslocamento == "deslSim" && $sobreposicao == "sobSim" && $invasao == "invSim" && $diferenca == "difSim") {
+      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta avanço em relação a via pública, além de sobreposição com o lote vizinho YYY. Além disso, foi identificada divergência entre a área da planta e do memorial descritivo. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante YYY, avanço em relação à via ZZZ e pela diferença de XXX  entre a área da planta e do memorial descritivo. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
+    }
+    else if ($deslocamento == "deslSim" && $sobreposicao == "sobSim" && $invasao == "invNao" && $diferenca == "difSim") {
+      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta sobreposição com o lote vizinho YYY. Também foi identificada divergência entre a área da planta e do memorial descritivo. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante YYY e pela diferença de XXX  entre a área da planta e do memorial descritivo. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
+    }
+    else if ($deslocamento == "deslSim" && $sobreposicao == "sobSim" && $invasao == "invNao" && $diferenca == "difNao") {
+      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta sobreposição com o lote vizinho YYY. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante YYY.';
+    }
+    else if ($deslocamento == "deslSim" && $sobreposicao == "sobNao" && $invasao == "invSim" && $diferenca == "difNao") {
+      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta avanço em relação a via pública. Além disso, foi identificada divergência entre a área da planta e do memorial descritivo. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pelo avanço em relação à via ZZZ e pela diferença de XXX  entre a área da planta e do memorial descritivo. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
+    }
+
+    
   }  
 }
 
@@ -422,11 +465,13 @@ $header->addText('RELATÓRIO TÉCNICO nº', $headerFontStyle, $paragraphStyle);
 $section->addText($texto_assunto. "\t\t\t\t" . $analises .'ª análise', $contentfontStyle);
 $section->addText('Solicitação de demanda: ' . $solicitacao, $contentfontStyle);
 $section->addText('Contribuinte: '.$contribuinte, $contentfontStyle);
+$section->addText('Matrícula(s): '.$matriculaImovel, $contentfontStyle);
 $section->addText('Inscrição Imobiliária: '.$inscricao, $contentfontStyle);
 $section->addText('Endereço do imóvel: Rua '.$rua.', nº '.$numero. ' - bairro '.$bairro. ', '.$cidade.' - '.$estado, $contentfontStyle);
 $section->addText('Dados recebidos: '.$informacoes, $contentfontStyle);
 $section->addTextBreak();
-$section ->addText($allNao, $contentfontStyle);
+$section ->addText($textMatricula, $contentfontStyle);
+$section ->addText($textGeral, $contentfontStyle);
 
 $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
 $writer->save('exemplo.docx');
