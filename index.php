@@ -241,13 +241,13 @@ input[type="submit"]:hover {
               <option value="6">, ao fundo</option>
               <option value="7">e à esquerda(finalizar)</option>
               <option value="8">e à direita(finalizar)</option>
-              <option value="6">e ao fundo(finalizar)</option>
+              <option value="9">e ao fundo(finalizar)</option>
           </select>
           <select name="terceiraSob" id="terceiraSob">
               <option value="">Selecione a terceira sobreposição</option>
               <option value="7">e à esquerda(finalizar)</option>
               <option value="8">e à direita(finalizar)</option>
-              <option value="6">e ao fundo(finalizar)</option>
+              <option value="9">e ao fundo(finalizar)</option>
           </select>
         </div>
         </fieldset>
@@ -344,53 +344,92 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sobreposicao = $_POST['sobreposicao'];
     $invasao = $_POST['invasao'];
     $diferenca = $_POST['diferenca'];
-    if (isset($_POST['primeiraSob'])) {
-      $inputPrimeiraSobreposicao = $_POST['primeiraSob'];
-  } else {
-      $inputPrimeiraSobreposicao = '';
-  }
-    if (isset($_POST['segundaSob'])) {
-      $inputSegundaSobreposicao = $_POST['segundaSob'];
-  } else {
-      $inputSegundaSobreposicao = '';
-  }
-    if (isset($_POST['terceiraSob'])) {
-      $inpuTerceiraSobreposicao = $_POST['terceiraSob'];
-  } else {
-      $inpuTerceiraSobreposicao = '';
-  }
+    $primeiraSob = '';
+    $segundaSob = '';
+    $terceiraSob = '';
+
+    // Verifica o valor selecionado em primeiraSob
+    switch (isset($_POST['primeiraSob']) ? $_POST['primeiraSob'] : '') {
+      case '1':
+          $primeiraSob = 'à esquerda';
+          break;
+      case '2':
+          $primeiraSob = 'à direita';
+          break;
+      case '3':
+          $primeiraSob = 'ao fundo';
+          break;
+    }
+
+    // Verifica o valor selecionado em segundaSob
+    switch (isset($_POST['segundaSob']) ? $_POST['segundaSob'] : '') {
+      case '4':
+          $segundaSob = ', à direita';
+          break;
+      case '5':
+          $segundaSob = ', à esquerda';
+          break;
+      case '6':
+          $segundaSob = ', ao fundo';
+          break;
+      case '7':
+          $segundaSob = 'e à esquerda';
+          break;
+      case '8':
+          $segundaSob = 'e à direita';
+          break;
+      case '9':
+          $segundaSob = 'e ao fundo';
+          break;
+    }
+
+    // Verifica o valor selecionado em terceiraSob
+    switch (isset($_POST['terceiraSob']) ? $_POST['terceiraSob'] : '') {
+      case '7':
+          $terceiraSob = ' e à esquerda';
+          break;
+      case '8':
+          $terceiraSob = ' e à direita';
+          break;
+      case '9':
+          $terceiraSob = ' e ao fundo';
+          break;
+    }
+    // Concatena as três variáveis em uma única string
+    $resultado = $primeiraSob . $segundaSob . $terceiraSob;
+
     if (isset($_POST['txtInvasao'])) {
       $inputInvasão = $_POST['txtInvasao'];
-  } else {
-      $inputInvasão = '';
-  }
-  if (isset($_POST['txtDiferenca'])) {
-    $inputDiferenca = $_POST['txtDiferenca'];
-} else {
-    $inputDiferenca = '';
-}
-$textGeral ='';
+    } else {
+        $inputInvasão = '';
+    }
+    if (isset($_POST['txtDiferenca'])) {
+      $inputDiferenca = $_POST['txtDiferenca'];
+    } else {
+        $inputDiferenca = '';
+    }
+    $textGeral ='';
 
     if ($deslocamento == "deslNao" && $sobreposicao == "sobNao" && $invasao == "invNao" && $diferenca == "difNao") {
       $textGeral = 'Após verificação dos arquivos apresentados à Prefeitura Municipal de Itabira referentes ao levantamento realizado, não foram identificados deslocamentos, sobreposições, nem invasão de vias públicas. Recomenda-se que a Prefeitura Municipal de Itabira opte pelo deferimento do processo XXXX/XX/XXXX.';
     }
     else if ($deslocamento == "deslNao" && $sobreposicao == "sobNao" && $invasao == "invNao" && $diferenca == "difSim") {
-      $textGeral = 'Após verificação dos arquivos apresentados à Prefeitura Municipal de Itabira referentes ao levantamento realizado, não foram identificados deslocamentos, sobreposições, nem invasão de vias públicas. Entretanto, foi identificada divergência entre a área da planta e do memorial descritivo. Recomenda-se que a Prefeitura Municipal de Itabira opte pelo indeferimento do processo XXXX/XX/XXXX, devido à diferença de '.$inputDiferenca .'  entre a área da planta e do memorial descritivo. Após a adequação, o processo se torna apto ao deferimento.'. "\n" . ' OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
+      $textGeral = 'Após verificação dos arquivos apresentados à Prefeitura Municipal de Itabira referentes ao levantamento realizado, não foram identificados deslocamentos, sobreposições, nem invasão de vias públicas. Entretanto, foi identificada divergência entre a área da planta e do memorial descritivo. Recomenda-se que a Prefeitura Municipal de Itabira opte pelo indeferimento do processo XXXX/XX/XXXX, devido à diferença de '.$inputDiferenca .'  entre a área da planta e do memorial descritivo. Após a adequação, o processo se torna apto ao deferimento. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
     }
     else if ($deslocamento == "deslSim" && $sobreposicao == "sobSim" && $invasao == "invSim" && $diferenca == "difNao") {
-      $textGeral ='Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta avanço em relação a via pública, além de sobreposição com o lote vizinho YYY. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante YYY e avanço em relação à via ZZZ.';
+      $textGeral ='Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta avanço em relação a via pública, além de sobreposição com o lote vizinho '.$resultado.'. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante '.$resultado.' e avanço em relação à via '.$inputInvasão.'.';
     }
     else if ($deslocamento == "deslSim" && $sobreposicao == "sobSim" && $invasao == "invSim" && $diferenca == "difSim") {
-      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta avanço em relação a via pública, além de sobreposição com o lote vizinho YYY. Além disso, foi identificada divergência entre a área da planta e do memorial descritivo. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante YYY, avanço em relação à via ZZZ e pela diferença de XXX  entre a área da planta e do memorial descritivo. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
+      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta avanço em relação a via pública, além de sobreposição com o lote vizinho '.$resultado.'. Além disso, foi identificada divergência entre a área da planta e do memorial descritivo. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante '.$resultado.', avanço em relação à via '.$inputInvasão.'. e pela diferença de '.$inputDiferenca.' entre a área da planta e do memorial descritivo. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
     }
     else if ($deslocamento == "deslSim" && $sobreposicao == "sobSim" && $invasao == "invNao" && $diferenca == "difSim") {
-      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta sobreposição com o lote vizinho YYY. Também foi identificada divergência entre a área da planta e do memorial descritivo. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante YYY e pela diferença de XXX  entre a área da planta e do memorial descritivo. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
+      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta sobreposição com o lote vizinho '.$resultado.'. Também foi identificada divergência entre a área da planta e do memorial descritivo. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante '.$resultado.' e pela diferença de '.$inputDiferenca.'  entre a área da planta e do memorial descritivo. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
     }
     else if ($deslocamento == "deslSim" && $sobreposicao == "sobSim" && $invasao == "invNao" && $diferenca == "difNao") {
-      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta sobreposição com o lote vizinho YYY. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante YYY.';
+      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta sobreposição com o lote vizinho '.$resultado.'. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pela sobreposição à propriedade confinante '.$resultado.'.';
     }
     else if ($deslocamento == "deslSim" && $sobreposicao == "sobNao" && $invasao == "invSim" && $diferenca == "difNao") {
-      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta avanço em relação a via pública. Além disso, foi identificada divergência entre a área da planta e do memorial descritivo. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pelo avanço em relação à via ZZZ e pela diferença de XXX  entre a área da planta e do memorial descritivo. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
+      $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta avanço em relação a via pública. Além disso, foi identificada divergência entre a área da planta e do memorial descritivo. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pelo avanço em relação à via '.$inputInvasão. 'e pela diferença de '.$inputDiferenca.'  entre a área da planta e do memorial descritivo. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
     }
 
     
@@ -403,8 +442,8 @@ $phpWord = new \PhpOffice\PhpWord\PhpWord();
 
 $section = $phpWord->addSection();
 $header = $section->addHeader();
-
-
+$footer = $section->addFooter();
+$footer->addPreserveText('Pág {PAGE} de {NUMPAGES}', null, array('alignment' => 'right'));
 
 // config style
 $tableStyle = array(
@@ -429,6 +468,7 @@ $contentfontStyle = array(
 	'name' => 'Arial', 'size' => 12, 'lineHeight' => 1.5
 
 );
+
 //////////////////////////////fim da config de style//////////////////
 
 // create a new table
@@ -472,6 +512,7 @@ $section->addText('Dados recebidos: '.$informacoes, $contentfontStyle);
 $section->addTextBreak();
 $section ->addText($textMatricula, $contentfontStyle);
 $section ->addText($textGeral, $contentfontStyle);
+
 
 $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
 $writer->save('exemplo.docx');
