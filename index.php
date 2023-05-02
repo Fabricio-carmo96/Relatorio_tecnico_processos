@@ -7,84 +7,128 @@ include_once 'conexao.php';
 <html>
 <head>
     <title>Relatorio</title>
-    <style>
-/* Definindo uma margem e um padding padrão */
-* {
-  margin: 0;
-  padding: 0;
-}
+<style>
+    /* Estilo para o container dos responsáveis técnicos */
+    #responsaveis {
+    margin-bottom: 10px;
+  }
 
-/* Estilizando o corpo da página */
-body {
-  font-family: Arial, sans-serif;
-  font-size: 16px;
-  line-height: 1.5;
-  background-color: #f2f2f2;
-}
+  /* Estilo para o campo de entrada do responsável técnico */
+  .responsavel-input {
+    width: 200px;
+    margin-right: 5px;
+  }
+
+  /* Estilo para o botão de remoção do responsável técnico */
+  .remove-responsavel {
+    background-color: #d9534f;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    margin-left: 5px;
+    cursor: pointer;
+  }
+
+  /* Estilo para o botão de adicionar responsável técnico */
+  #add-responsavel {
+    background-color: #337ab7;
+    color: #fff;
+    border: none;
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+
+  /* Estilo para as etiquetas de data */
+  label[for="data-recebimento"], label[for="data-parecer"] {
+    display: block;
+    margin-bottom: 5px;
+  }
+
+  /* Estilo para os campos de entrada de data */
+  input[type="date"] {
+    width: 200px;
+    height: 30px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    padding: 5px;
+  }
+  /* Definindo uma margem e um padding padrão */
+  * {
+    margin: 0;
+    padding: 0;
+  }
+
+  /* Estilizando o corpo da página */
+  body {
+    font-family: Arial, sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+    background-color: #f2f2f2;
+  }
 
 
-/* Estilizando os campos do formulário */
-form {
-  max-width: 600px;
-  margin: 0 auto;
-  background-color: #fff;
-  padding: 20px;
-  box-shadow: 0px 0px 10px #ccc;
-}
+  /* Estilizando os campos do formulário */
+  form {
+    max-width: 600px;
+    margin: 0 auto;
+    background-color: #fff;
+    padding: 20px;
+    box-shadow: 0px 0px 10px #ccc;
+  }
 
-label {
-  display: block;
-  margin-bottom: 10px;
-  font-weight: bold;
-}
+  label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+  }
 
-input[type="text"],
-select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 20px;
-}
+  input[type="text"],
+  select {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
 
-input[type="checkbox"] {
-  margin-right: 10px;
-}
+  input[type="checkbox"] {
+    margin-right: 10px;
+  }
 
-fieldset {
-  margin-bottom: 20px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-}
+  fieldset {
+    margin-bottom: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
 
-legend {
-  font-weight: bold;
-  margin-bottom: 10px;
-}
+  legend {
+    font-weight: bold;
+    margin-bottom: 10px;
+  }
 
-textarea {
-  width: 100%;
-  height: 100px;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  margin-bottom: 20px;
-}
+  textarea {
+    width: 100%;
+    height: 100px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
 
-input[type="submit"] {
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  padding: 10px 20px;
-  font-size: 16px;
-  cursor: pointer;
-}
+  input[type="submit"] {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
 
-input[type="submit"]:hover {
-  background-color: #0062cc;
-}
+  input[type="submit"]:hover {
+    background-color: #0062cc;
+  }
 
 </style>
 
@@ -100,6 +144,11 @@ input[type="submit"]:hover {
           </div>
       </div>
       <button type="button" id="add-responsavel">Adicionar outro responsável</button>
+</br></br>
+    <label for="data-recebimento">Selecione a data de recebimento do processo:</label>
+      <input type="date" id="data-recebimento" name="data-recebimento">
+    <label for="data-parecer">Selecione a data do parecer:</label>
+      <input type="date" id="data-parecer" name="data-parecer">
 
     <label for="assunto">Assunto:</label>
     <fieldset>
@@ -291,6 +340,10 @@ require_once 'vendor/autoload.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $responsaveis = $_POST['responsavel'];
+    $data_recebimento = $_POST['data-recebimento'];
+    $data_formatada = date('d-m-Y', strtotime($data_recebimento));
+    $data_parecer = $_POST['data-parecer'];
+    $data_parecer_formatada = date('d-m-Y', strtotime($data_parecer));
     if (isset($_POST['assunto']) && is_array($_POST['assunto'])) {
       $assuntos = $_POST['assunto'];
       $texto_assunto = 'Assunto:';
@@ -502,11 +555,11 @@ foreach ($responsaveis as $responsavel) {
 $cell3 = $table->addCell(2500);
 $cell3->addText('Recebimento – Revisão');
 $cell3->addTextBreak();
-$cell3->addText('04/04/2023 – 01');
+$cell3->addText($data_formatada . ' - ');
 $cell4 = $table->addCell(1800);
 $cell4->addText('Data parecer:');
 $cell4->addTextBreak();
-$cell4->addText('18/04/2023');
+$cell4->addText($data_parecer_formatada);
 
 $header->addTextBreak();
 //header title
