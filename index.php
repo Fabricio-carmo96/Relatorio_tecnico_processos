@@ -92,6 +92,15 @@ input[type="submit"]:hover {
 <body>
     <!-- Form selecionar assunto -->
     <form action="" method="post">
+    <label for="responsavel">Responsável Técnico:</label>
+      <div id="responsaveis">
+          <div>
+              <input type="text" name="responsavel[]" class="responsavel-input">
+              <button type="button" class="remove-responsavel">Remover</button>
+          </div>
+      </div>
+      <button type="button" id="add-responsavel">Adicionar outro responsável</button>
+
     <label for="assunto">Assunto:</label>
     <fieldset>
         <legend>Selecione até 2 opções:</legend>
@@ -281,6 +290,7 @@ input[type="submit"]:hover {
 require_once 'vendor/autoload.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    $responsaveis = $_POST['responsavel'];
     if (isset($_POST['assunto']) && is_array($_POST['assunto'])) {
       $assuntos = $_POST['assunto'];
       $texto_assunto = 'Assunto:';
@@ -485,9 +495,10 @@ $cell1->addImage('ib.jpeg', array(
 $cell2 = $table->addCell(2800);
 $cell2->addText('Responsável Técnico');
 $cell2->addTextBreak();
-$cell2->addText('Paloma R. B. Ferreira');
-$cell2->addTextBreak();
-$cell2->addText('Marlon Carvalho Heringer');
+foreach ($responsaveis as $responsavel) {
+  $cell2->addText($responsavel);
+  $cell2->addTextBreak();
+}
 $cell3 = $table->addCell(2500);
 $cell3->addText('Recebimento – Revisão');
 $cell3->addTextBreak();
@@ -520,6 +531,27 @@ $writer->save('exemplo.docx');
 
 ?>
 </body>
+<script> //Adicionar mais de um técnico responsável ou remover
+    var responsaveis = document.getElementById("responsaveis");
+    var addResponsavelButton = document.getElementById("add-responsavel");
+
+    function addResponsavel() {
+        var novoResponsavel = document.createElement("div");
+        novoResponsavel.innerHTML = '<input type="text" name="responsavel[]" class="responsavel-input"><button type="button" class="remove-responsavel">Remover</button>';
+        responsaveis.appendChild(novoResponsavel);
+
+        var removeResponsavelButtons = document.getElementsByClassName("remove-responsavel");
+        for (var i = 0; i < removeResponsavelButtons.length; i++) {
+            removeResponsavelButtons[i].addEventListener("click", removeResponsavel);
+        }
+    }
+
+    function removeResponsavel() {
+        this.parentElement.remove();
+    }
+
+    addResponsavelButton.addEventListener("click", addResponsavel);
+</script>
 <script>
 var checkboxes = document.querySelectorAll('input[type=checkbox][name="assunto[]"]');
 var maxLimit = 2;
