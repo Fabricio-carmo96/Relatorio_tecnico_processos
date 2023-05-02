@@ -136,14 +136,17 @@ include_once 'conexao.php';
 <body>
     <!-- Form selecionar assunto -->
     <form action="" method="post">
-    <label for="responsavel">Responsável Técnico:</label>
-      <div id="responsaveis">
-          <div>
-              <input type="text" name="responsavel[]" class="responsavel-input">
-              <button type="button" class="remove-responsavel">Remover</button>
-          </div>
-      </div>
-      <button type="button" id="add-responsavel">Adicionar outro responsável</button>
+    <div id="responsaveis">
+  <div class="responsavel">
+    <label for="nome">Nome:</label>
+    <input type="text" name="nome[]" id="nome">
+    <label for="profissao">Profissão:</label>
+    <input type="text" name="profissao[]" id="profissao">
+    <label for="crea">CREA:</label>
+    <input type="text" name="crea[]" id="crea">
+  </div>
+</div>
+<button type="button" id="add-responsavel">Adicionar outro responsável</button>
 </br></br>
     <label for="data-recebimento">Selecione a data de recebimento do processo:</label>
       <input type="date" id="data-recebimento" name="data-recebimento">
@@ -339,7 +342,19 @@ include_once 'conexao.php';
 require_once 'vendor/autoload.php';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $responsaveis = $_POST['responsavel'];
+      // Cria arrays vazios para as informações dos técnicos
+    $nomes = array();
+    $profissoes = array();
+    $creas = array();
+
+     // Percorre cada técnico e salva as informações nos arrays
+    foreach ($_POST['nome'] as $index => $nome) {
+      $profissao = $_POST['profissao'][$index];
+      $crea = $_POST['crea'][$index];
+      $nomes[] = $nome;
+      $profissoes[] = $profissao;
+      $creas[] = $crea;
+    }
     $data_recebimento = $_POST['data-recebimento'];
     $data_formatada = date('d-m-Y', strtotime($data_recebimento));
     $data_parecer = $_POST['data-parecer'];
@@ -498,6 +513,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     
   }  
 }
+setlocale(LC_TIME, 'Portuguese_Brazil.1252');
+$dateString = strftime('%A, %d de %^B de %Y', strtotime('today'));
+$dateString = utf8_encode(ucwords(strftime('%A')).', '.strftime('%d').' de '.ucwords(strftime('%B')).' de '.strftime('%Y'));
 
 
 if (isset($_POST['enviar'])) {
@@ -526,6 +544,12 @@ $paragraphStyle = array(
 	'marginTop' => 50,
 	'lineHeight' => 1.5
 );
+$footerStyle = array(
+'size' => 12,
+'align' => 'center',
+'marginTop' => 50,
+'lineHeight' => 1.5
+);
 //Configração de fonte para conteudo
 $contentfontStyle = array(
 	'name' => 'Arial', 'size' => 12, 'lineHeight' => 1.5
@@ -548,8 +572,9 @@ $cell1->addImage('ib.jpeg', array(
 $cell2 = $table->addCell(2800);
 $cell2->addText('Responsável Técnico');
 $cell2->addTextBreak();
-foreach ($responsaveis as $responsavel) {
-  $cell2->addText($responsavel);
+for ($i = 0; $i < count($nomes); $i++) {
+  // Adiciona o texto referente ao técnico atual
+  $cell2->addText($nomes[$i]);
   $cell2->addTextBreak();
 }
 $cell3 = $table->addCell(2500);
@@ -576,34 +601,47 @@ $section->addText('Dados recebidos: '.$informacoes, $contentfontStyle);
 $section->addTextBreak();
 $section ->addText($textMatricula, $contentfontStyle);
 $section ->addText($textGeral, $contentfontStyle);
-
-
+$section ->addText('Itabira, '. $dateString, $footerStyle, null, array('alignment' => 'right'));
+for ($i = 0; $i < count($nomes); $i++) {
+  // Adiciona o texto referente ao técnico atual
+  $section->addText($nomes[$i]);
+  $section->addText($profissoes[$i]);
+  $section->addText($creas[$i]);
+  $section->addText("");
+}
 $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
 $writer->save('exemplo.docx');
 }
 
 ?>
 </body>
-<script> //Adicionar mais de um técnico responsável ou remover
-    var responsaveis = document.getElementById("responsaveis");
-    var addResponsavelButton = document.getElementById("add-responsavel");
+<script>
+  var responsaveis = document.getElementById("responsaveis");
+var addResponsavelButton = document.getElementById("add-responsavel");
 
-    function addResponsavel() {
-        var novoResponsavel = document.createElement("div");
-        novoResponsavel.innerHTML = '<input type="text" name="responsavel[]" class="responsavel-input"><button type="button" class="remove-responsavel">Remover</button>';
-        responsaveis.appendChild(novoResponsavel);
+function addResponsavel() {
+  var novoResponsavel = document.createElement("div");
+  novoResponsavel.innerHTML = `
+    </br><input type="text" name="nome[]" placeholder="Nome" class="responsavel-input">
+    <input type="text" name="profissao[]" placeholder="Profissão" class="responsavel-input">
+    <input type="text" name="crea[]" placeholder="CREA" class="responsavel-input">
+    <button type="button" class="remove-responsavel">Remover</button>
+  `;
+  responsaveis.appendChild(novoResponsavel);
 
-        var removeResponsavelButtons = document.getElementsByClassName("remove-responsavel");
-        for (var i = 0; i < removeResponsavelButtons.length; i++) {
-            removeResponsavelButtons[i].addEventListener("click", removeResponsavel);
-        }
-    }
+  // Adiciona um botão de remoção para o novo elemento
+  var removeResponsavelButton = novoResponsavel.querySelector(".remove-responsavel");
+  removeResponsavelButton.addEventListener("click", removeResponsavel);
 
-    function removeResponsavel() {
-        this.parentElement.remove();
-    }
+}
 
-    addResponsavelButton.addEventListener("click", addResponsavel);
+function removeResponsavel() {
+  this.parentElement.remove();
+}
+
+// Inicialização do script
+addResponsavelButton.addEventListener("click", addResponsavel);
+
 </script>
 <script>
 var checkboxes = document.querySelectorAll('input[type=checkbox][name="assunto[]"]');
