@@ -150,10 +150,21 @@ include_once 'conexao.php';
 </br></br>
     <label for="data-recebimento">Selecione a data de recebimento do processo:</label>
       <input type="date" id="data-recebimento" name="data-recebimento">
+</br></br>
+    <label for="revisao">Selecione a revisão do relatório:</label>
+      <select id="revisao" name="revisao">
+        <option value="01">01</option>
+        <option value="02">02</option>
+        <option value="03">03</option>
+        <option value="04">04</option>
+        <option value="05">05</option>
+      </select>
+    <label for="n_relatorio">Número do relatório:</label>
+      <input type="text" name="n_relatorio" id="n_relatorio" placeholder = "Digite o número do relatório sem o ano">
     <label for="data-parecer">Selecione a data do parecer:</label>
       <input type="date" id="data-parecer" name="data-parecer">
-
-    <label for="assunto">Assunto:</label>
+  </br></br>
+      <label for="assunto">Assunto:</label>
     <fieldset>
         <legend>Selecione até 2 opções:</legend>
         <input type="checkbox" id="retificacao" name="assunto[]" value="Retificação de área">
@@ -355,8 +366,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
       $profissoes[] = $profissao;
       $creas[] = $crea;
     }
+    $anoAtual = date("Y");
     $data_recebimento = $_POST['data-recebimento'];
     $data_formatada = date('d-m-Y', strtotime($data_recebimento));
+    $revisao = $_POST['revisao'];
     $data_parecer = $_POST['data-parecer'];
     $data_parecer_formatada = date('d-m-Y', strtotime($data_parecer));
     if (isset($_POST['assunto']) && is_array($_POST['assunto'])) {
@@ -508,9 +521,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     else if ($deslocamento == "deslSim" && $sobreposicao == "sobNao" && $invasao == "invSim" && $diferenca == "difNao") {
       $textGeral = 'Em visita a campo checou-se o levantamento apresentado. Foi conferido quanto à indagação de deslocamento e verificou-se que o levantamento planimétrico entregue à Prefeitura Municipal de Itabira apresenta avanço em relação a via pública. Além disso, foi identificada divergência entre a área da planta e do memorial descritivo. Aconselha-se o indeferimento do processo XXXX/XX/XXXX pelo avanço em relação à via '.$inputInvasão. 'e pela diferença de '.$inputDiferenca.'  entre a área da planta e do memorial descritivo. OBS: Ao refazer o levantamento planimétrico, favor se atentar na precisão do memorial descritivo. A área da planta e do memorial deverão ser isométricas, em todas as casas decimais.';
+    } else {
+      echo '<script>alert("O conjunto de opções (Deslocamento, Sobreposição, Invasão e Diferença) que você escolheu ainda não está cadastrado no sistema");</script>';
     }
-
-    
   }  
 }
 setlocale(LC_TIME, 'Portuguese_Brazil.1252');
@@ -555,7 +568,11 @@ $contentfontStyle = array(
 	'name' => 'Arial', 'size' => 12, 'lineHeight' => 1.5
 
 );
-
+$dateFontStyle = 'Date';
+$phpWord->addFontStyle(
+    $dateFontStyle,
+    array('name' => 'Arial', 'align' => 'right', 'size' => 12)
+);
 //////////////////////////////fim da config de style//////////////////
 
 // create a new table
@@ -580,7 +597,7 @@ for ($i = 0; $i < count($nomes); $i++) {
 $cell3 = $table->addCell(2500);
 $cell3->addText('Recebimento – Revisão');
 $cell3->addTextBreak();
-$cell3->addText($data_formatada . ' - ');
+$cell3->addText($data_formatada . ' - ' .$revisao);
 $cell4 = $table->addCell(1800);
 $cell4->addText('Data parecer:');
 $cell4->addTextBreak();
@@ -601,12 +618,17 @@ $section->addText('Dados recebidos: '.$informacoes, $contentfontStyle);
 $section->addTextBreak();
 $section ->addText($textMatricula, $contentfontStyle);
 $section ->addText($textGeral, $contentfontStyle);
-$section ->addText('Itabira, '. $dateString, $footerStyle, null, array('alignment' => 'right'));
+$section->addText('Itabira, ' . $dateString, $dateFontStyle, array('alignment' => 'right'));
+$section->addTextBreak();
+$section->addTextBreak();
+$section->addTextBreak();
+
 for ($i = 0; $i < count($nomes); $i++) {
   // Adiciona o texto referente ao técnico atual
-  $section->addText($nomes[$i]);
-  $section->addText($profissoes[$i]);
-  $section->addText($creas[$i]);
+  $section->addText('____________________________________');
+  $section->addText($nomes[$i], null, array('size' => 12));
+  $section->addText($profissoes[$i], null, array('size' => 12));
+  $section->addText($creas[$i], null, array('size' => 12));
   $section->addText("");
 }
 $writer = \PhpOffice\PhpWord\IOFactory::createWriter($phpWord, 'Word2007');
