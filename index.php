@@ -619,7 +619,7 @@ $section->addText('Solicitação de demanda: ' . $solicitacao, $contentfontStyle
 $section->addText('Contribuinte: '.$contribuinte, $contentfontStyle);
 $section->addText('Matrícula(s): '.$matriculaImovel, $contentfontStyle);
 $section->addText('Inscrição Imobiliária: '.$inscricao, $contentfontStyle);
-$section->addText('Endereço do imóvel: Rua '.$rua.', nº '.$numero. ' - bairro '.$bairro. ', '.$cidade.' - '.$estado, $contentfontStyle);
+$section->addText('Endereço do imóvel: Rua '.$rua.', nº '.$numero. ' – bairro '.$bairro. ', '.$cidade.' – '.$estado, $contentfontStyle);
 $section->addText('Dados recebidos: '.$informacoes, $contentfontStyle);
 $section->addTextBreak();
 $section ->addText($textMatricula, $contentfontStyle);
