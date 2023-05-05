@@ -706,7 +706,7 @@ function mostrarOutros() {
 </script>
 <script>
 const BtDownload = document.getElementById('BtBaixar');
-	const Baixado = document.getElementById('baixado');
+const Baixado = document.getElementById('baixado');
 	BtDownload.addEventListener('click', function(){
 		alert('Arquivo gerado com sucesso, clique em OK para baixar');
 		Baixado.click();
